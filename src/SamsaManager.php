@@ -8,6 +8,8 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Connection;
 use Illuminate\Database\DatabaseManager;
+use Illuminate\Redis\Connections\PhpRedisConnection;
+use Illuminate\Redis\Connections\PredisConnection;
 use Illuminate\Support\Manager;
 use InvalidArgumentException;
 use PHPUnit\Framework\Assert as PHPUnit;
@@ -31,6 +33,8 @@ use Siberfx\Samsa\Drivers\InMemory\InMemoryDelayedStore;
 use Siberfx\Samsa\Drivers\InMemory\InMemoryDriver;
 use Siberfx\Samsa\Drivers\Nats\NatsConnection;
 use Siberfx\Samsa\Drivers\Nats\NatsDriver;
+use Siberfx\Samsa\Drivers\Redis\RedisConnection;
+use Siberfx\Samsa\Drivers\Redis\RedisDriver;
 use Siberfx\Samsa\Producer\Producer;
 use Siberfx\Samsa\Producer\TopicRegistry;
 
@@ -165,7 +169,25 @@ class SamsaManager extends Manager
 
     protected function createRedisDriver(): Client
     {
-        throw new InvalidArgumentException('The Redis Streams driver is planned for Samsa v1.3.');
+        if (! $this->container->bound('redis')) {
+            throw new InvalidArgumentException('The Redis Streams driver needs Laravel\'s Redis component (illuminate/redis) and a configured connection.');
+        }
+
+        $config = (array) $this->config->get('samsa.drivers.redis', []);
+
+        $connection = $this->container->make('redis')->connection($config['connection'] ?? 'default');
+
+        if (! $connection instanceof PhpRedisConnection && ! $connection instanceof PredisConnection) {
+            throw new InvalidArgumentException('The Redis Streams driver needs a phpredis or predis connection.');
+        }
+
+        $driver = new RedisDriver(new RedisConnection(
+            $connection,
+            (string) ($config['prefix'] ?? 'samsa:'),
+            (int) ($config['dedup_ttl'] ?? 86400),
+        ), $this->serializer());
+
+        return $this->makeClient('redis', $driver, $driver->delayed());
     }
 
     /**

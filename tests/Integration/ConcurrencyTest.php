@@ -6,6 +6,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Siberfx\Samsa\Drivers\Nats\NatsDriver;
+use Siberfx\Samsa\Drivers\Redis\RedisDriver;
+use Siberfx\Samsa\Drivers\Redis\RedisLogStore;
 use Siberfx\Samsa\Facades\Samsa;
 use Siberfx\Samsa\Tests\TestCase;
 use Symfony\Component\Process\PhpExecutableFinder;
@@ -40,10 +42,27 @@ final class ConcurrencyTest extends TestCase
             ]);
         }
 
+        if (getenv('SAMSA_TEST_DRIVER') === 'redis') {
+            if (! getenv('REDIS_HOST')) {
+                $this->markTestSkipped('SAMSA_TEST_DRIVER=redis needs REDIS_HOST.');
+            }
+
+            $this->redisPrefix = 'samsarace'.bin2hex(random_bytes(3)).':';
+            config([
+                'database.redis.client' => getenv('SAMSA_TEST_REDIS_CLIENT') ?: (extension_loaded('redis') ? 'phpredis' : 'predis'),
+                'samsa.default' => 'redis',
+                'samsa.drivers.redis' => ['connection' => 'default', 'prefix' => $this->redisPrefix],
+            ]);
+        }
+
         Samsa::createTopic('race', self::PARTITIONS);
 
         if ($this->onNats()) {
             $this->assertInstanceOf(NatsDriver::class, Samsa::storage(), 'the parent must use NATS too');
+        }
+
+        if ($this->redisPrefix !== null) {
+            $this->assertInstanceOf(RedisDriver::class, Samsa::storage(), 'the parent must use Redis too');
         }
 
         Schema::dropIfExists('samsa_it_consumed');
@@ -59,6 +78,8 @@ final class ConcurrencyTest extends TestCase
 
     private ?string $natsPrefix = null;
 
+    private ?string $redisPrefix = null;
+
     private function onNats(): bool
     {
         return getenv('SAMSA_TEST_DRIVER') === 'nats';
@@ -70,6 +91,14 @@ final class ConcurrencyTest extends TestCase
             $storage = Samsa::storage();
 
             if ($storage instanceof NatsDriver) {
+                $storage->destroy();
+            }
+        }
+
+        if ($this->redisPrefix !== null) {
+            $storage = Samsa::storage();
+
+            if ($storage instanceof RedisDriver) {
                 $storage->destroy();
             }
         }
@@ -98,12 +127,12 @@ final class ConcurrencyTest extends TestCase
                 $perWriterCount[$record->payload['writer']] = ($perWriterCount[$record->payload['writer']] ?? 0) + 1;
             }
 
-            $offsets = array_map(fn ($r) => (int) $r->offset, $records);
+            $offsets = array_map(fn ($r) => $this->redisPrefix === null ? (int) $r->offset : $r->offset, $records);
 
-            if ($this->onNats()) {
-                // JetStream sequences are stream-global: increasing per partition, not contiguous.
+            if ($this->onNats() || $this->redisPrefix !== null) {
+                // JetStream sequences / Redis entry IDs are stream-global: increasing per partition, not contiguous.
                 $sorted = array_values(array_unique($offsets));
-                sort($sorted);
+                usort($sorted, fn ($a, $b) => is_int($a) ? $a <=> $b : RedisLogStore::compare($a, $b));
                 $this->assertSame($sorted, $offsets, "partition {$p}: offsets must strictly increase");
             } else {
                 $this->assertSame(range(0, count($records) - 1), $offsets, "partition {$p}: offsets must be contiguous from 0, with no gaps or duplicates");
@@ -141,7 +170,8 @@ final class ConcurrencyTest extends TestCase
         $this->waitFor([$b, $c]);
 
         $rows = DB::table('samsa_it_consumed')->get();
-        $distinct = $rows->map(fn ($r) => "{$r->partition}:{$r->offset}")->unique();
+        // Every record carries a unique seq; Redis entry IDs don't fit the integer offset column.
+        $distinct = $rows->map(fn ($r) => (int) $r->seq)->unique();
 
         $this->assertSame(400, $distinct->count(), 'every record was processed at least once: '.json_encode([
             'status' => Samsa::stats()->partitions('race-group', 'race'),
@@ -157,7 +187,7 @@ final class ConcurrencyTest extends TestCase
 
         // Within a partition, each member saw records in offset order.
         foreach ($rows->groupBy(fn ($r) => "{$r->member}|{$r->partition}") as $group => $memberRows) {
-            $offsets = $memberRows->sortBy('id')->pluck('offset')->map(fn ($o) => (int) $o)->values()->all();
+            $offsets = $memberRows->sortBy('id')->pluck('seq')->map(fn ($o) => (int) $o)->values()->all();
             $sorted = $offsets;
             sort($sorted);
             $this->assertSame($sorted, $offsets, "{$group} processed out of order");
@@ -181,6 +211,8 @@ final class ConcurrencyTest extends TestCase
                 'SAMSA_TEST_DRIVER' => getenv('SAMSA_TEST_DRIVER') ?: '',
                 'NATS_HOST' => getenv('NATS_HOST') ?: '',
                 'SAMSA_NATS_PREFIX' => $this->natsPrefix ?? '',
+                'SAMSA_REDIS_PREFIX' => $this->redisPrefix ?? '',
+                'REDIS_HOST' => getenv('REDIS_HOST') ?: '127.0.0.1',
             ],
             null,
             120,

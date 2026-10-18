@@ -177,10 +177,10 @@ Replay only works as far back as retention allows.
 
 | Kafka | Samsa (all drivers) | Database driver | NATS JetStream | Redis Streams |
 |---|---|---|---|---|
-| Topic | Topic | `samsa_topics` row | Stream `SAMSA_{topic}` | Key prefix |
-| Partition | Partition | `samsa_log.partition` | Subject `samsa.{topic}.{N}` | Stream `{prefix}{topic}:p{N}` |
+| Topic | Topic | `samsa_topics` row | Stream `SAMSA_{topic}` | Field in hash `samsa:topics` |
+| Partition | Partition | `samsa_log.partition` | Subject `samsa.{topic}.{N}` | Stream `samsa:log:{topic}:{N}` |
 | Offset | Offset (string) | Per-partition counter | Stream sequence | Entry ID |
-| Consumer group | Group | `samsa_offsets.group_name` | State entry `offsets.{group}.{topic}.{N}` | `XGROUP` |
-| Commit | Commit | Row upsert | State entry update | `XACK` |
+| Consumer group | Group | `samsa_offsets.group_name` | State entry `offsets.{group}.{topic}.{N}` | Field in hash `samsa:offsets` |
+| Commit | Commit | Row upsert | State entry update | Fenced Lua `HSET` |
 | Group coordinator | Leases | `samsa_leases` | Compare-and-swap state entries | `SET NX PX` + Lua |
-| DLQ (by convention) | Dead letter store | `samsa_failed` | State entries `dlq.*` | `{topic}:dlq` stream |
+| DLQ (by convention) | Dead letter store | `samsa_failed` | State entries `dlq.*` | Hash `samsa:dlq` |

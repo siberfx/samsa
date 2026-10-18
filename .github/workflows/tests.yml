@@ -128,3 +128,42 @@ jobs:
           DB_DATABASE: samsa_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
+
+  redis:
+    name: redis (contract, end-to-end, multi-process)
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=5s --health-retries=10
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: samsa_test
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: --health-cmd="pg_isready" --health-interval=5s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php: '8.4'
+          extensions: pdo_pgsql, pcntl, redis
+          coverage: none
+      - run: composer update --prefer-dist --no-interaction --no-progress
+      - run: vendor/bin/phpunit
+        env:
+          REDIS_HOST: 127.0.0.1
+          SAMSA_TEST_DRIVER: redis
+          SAMSA_TEST_DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: samsa_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+      - name: Redis suites with predis
+        run: vendor/bin/phpunit tests/Contract/RedisDriverContractTest.php tests/Feature/RedisEndToEndTest.php
+        env:
+          REDIS_HOST: 127.0.0.1
+          SAMSA_TEST_REDIS_CLIENT: predis

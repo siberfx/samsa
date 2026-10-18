@@ -23,6 +23,12 @@ $app['config']->set('database.default', getenv('SAMSA_TEST_DB_CONNECTION') ?: 'm
 $app['config']->set('cache.default', 'array');
 $app->register(SamsaServiceProvider::class);
 
+if (getenv('SAMSA_TEST_DRIVER') === 'redis') {
+    $app['config']->set('database.redis.client', getenv('SAMSA_TEST_REDIS_CLIENT') ?: (extension_loaded('redis') ? 'phpredis' : 'predis'));
+    $app['config']->set('samsa.default', 'redis');
+    $app['config']->set('samsa.drivers.redis', ['connection' => 'default', 'prefix' => (string) getenv('SAMSA_REDIS_PREFIX')]);
+}
+
 if (getenv('SAMSA_TEST_DRIVER') === 'nats') {
     $app['config']->set('samsa.default', 'nats');
     $app['config']->set('samsa.drivers.nats', [

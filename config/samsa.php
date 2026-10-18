@@ -10,8 +10,8 @@ return [
     | Default driver
     |--------------------------------------------------------------------------
     |
-    | Supported: "database", "nats" (needs basis-company/nats), "memory".
-    | The "redis" driver is planned for v1.3.
+    | Supported: "database", "nats" (needs basis-company/nats), "redis"
+    | (Laravel Redis, Redis 6.2+) and "memory".
     |
     */
 
@@ -38,8 +38,9 @@ return [
         ],
 
         'redis' => [
-            'connection' => env('SAMSA_REDIS_CONNECTION', 'default'),
+            'connection' => env('SAMSA_REDIS_CONNECTION', 'default'), // a connection from config/database.php
             'prefix' => 'samsa:',
+            'dedup_ttl' => 86400,             // seconds a dedup key is remembered
         ],
 
         'memory' => [],

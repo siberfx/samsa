@@ -56,6 +56,7 @@ This page documents every key in `config/samsa.php`.
     'redis' => [
         'connection' => env('SAMSA_REDIS_CONNECTION', 'default'), // from config/database.php
         'prefix'     => 'samsa:',
+        'dedup_ttl'  => 86400,  // seconds a dedup key is remembered
     ],
 
     'memory' => [],

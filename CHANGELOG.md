@@ -6,9 +6,16 @@ All notable changes to `siberfx/samsa` are documented here. The format follows
 
 ## [Unreleased]
 
-### Planned
+## [1.3.0] - 2026-10-19
 
-- 1.3: Redis Streams driver.
+### Added
+
+- **Redis Streams driver** (`SAMSA_DRIVER=redis`, Redis 6.2+, phpredis or predis). It passes the full `StorageDriverContract`, the end-to-end tests and the multi-process tests. Each partition is a stream read by entry ID. Offsets, leases and members live in hashes and sorted sets. Leases, the fenced commit, and dedup with `XADD` are atomic Lua scripts. Retention uses approximate `MAXLEN` on produce and `XTRIM MINID` in `samsa:prune`. The queue driver, event bridge and message-bus transport all work on Redis.
+- `samsa.drivers.redis.dedup_ttl` option.
+
+### Notes
+
+- Redis Cluster is not supported yet (the lease and commit scripts span two keys).
 
 ## [1.2.0] - 2026-10-19
 
@@ -58,7 +65,8 @@ First stable release.
 - Events: `RecordProduced`, `RecordConsumed`, `RecordFailed`, `RecordDeadLettered`, `PartitionAssigned`, `PartitionRevoked`, `WorkerStopping`.
 - Multi-process integration tests for concurrent producers and for workers that are killed while consuming.
 
-[Unreleased]: https://github.com/siberfx/samsa/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/siberfx/samsa/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/siberfx/samsa/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/siberfx/samsa/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/siberfx/samsa/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/siberfx/samsa/releases/tag/v1.0.0

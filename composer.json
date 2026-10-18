@@ -44,13 +44,14 @@
         "laravel/pint": "^1.18",
         "orchestra/testbench": "^10.0|^11.0",
         "phpunit/phpunit": "^11.5|^12.0",
+        "predis/predis": "^3.7",
         "siberfx/message-bus": "^0.1",
         "symfony/process": "^7.2|^8.0"
     },
     "suggest": {
         "basis-company/nats": "Required for the NATS JetStream driver.",
         "ext-pcntl": "Required for graceful shutdown of workers on SIGTERM/SIGINT.",
-        "ext-redis": "Required for the Redis Streams driver (v1.3), or use predis/predis.",
+        "ext-redis": "For the Redis Streams driver (or use predis/predis).",
         "siberfx/message-bus": "Use Samsa as a message-bus transport."
     },
     "autoload": {
