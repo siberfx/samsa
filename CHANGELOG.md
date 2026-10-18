@@ -6,6 +6,13 @@ All notable changes to `siberfx/samsa` are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-19
+
+### Changed
+
+- **Requires PHP 8.3+ and Laravel 13.** Support for PHP 8.2 and Laravel 12 is dropped. Composer keeps projects on those versions on Samsa 1.3.x, which stays available.
+- Development now targets Orchestra Testbench 11 and PHPUnit 12, and the `siberfx/message-bus` integration is tested in every CI job.
+
 ## [1.3.0] - 2026-10-19
 
 ### Added
@@ -65,7 +72,8 @@ First stable release.
 - Events: `RecordProduced`, `RecordConsumed`, `RecordFailed`, `RecordDeadLettered`, `PartitionAssigned`, `PartitionRevoked`, `WorkerStopping`.
 - Multi-process integration tests for concurrent producers and for workers that are killed while consuming.
 
-[Unreleased]: https://github.com/siberfx/samsa/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/siberfx/samsa/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/siberfx/samsa/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/siberfx/samsa/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/siberfx/samsa/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/siberfx/samsa/compare/v1.0.0...v1.1.0

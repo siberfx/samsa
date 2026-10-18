@@ -16,7 +16,7 @@
 
 ## Requirements
 
-`siberfx/message-bus` (`^0.1`) requires **PHP 8.3+ and Laravel 13**, so this integration is only available there. Samsa itself also supports Laravel 12.
+`siberfx/message-bus` (`^0.1`) has the same requirements as Samsa: PHP 8.3+ and Laravel 13.
 
 ```bash
 composer require siberfx/samsa siberfx/message-bus

@@ -76,8 +76,8 @@ php artisan samsa:consume emails  orders     # an independent group reading the 
 
 ## Requirements
 
-- PHP 8.2+ (8.3+ for Laravel 13)
-- Laravel 12 or 13
+- PHP 8.3+
+- Laravel 13
 - MySQL 8+ / MariaDB 10.6+, PostgreSQL 13+ or SQLite 3.35+, a NATS 2.10+ server with JetStream (`composer require basis-company/nats`), or Redis 6.2+
 - `ext-pcntl` is recommended so workers shut down gracefully on `SIGTERM` (not available on Windows)
 
