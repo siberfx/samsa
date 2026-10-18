@@ -37,6 +37,10 @@ final class NatsEndToEndTest extends TestCase
     {
         CarbonImmutable::setTestNow();
 
+        if ($this->app === null) {
+            return; // skipped before the application booted
+        }
+
         $storage = $this->app->make(SamsaManager::class)->driver('nats')->storage();
 
         if ($storage instanceof NatsDriver) {
