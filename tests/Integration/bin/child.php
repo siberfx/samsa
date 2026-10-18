@@ -51,7 +51,7 @@ if ($mode === 'consume') {
             'writer' => $record->payload['writer'],
             'seq' => $record->payload['seq'],
         ]);
-        usleep(2000);
+        usleep(20000); // ~8s of work for one worker, so later workers and the kill happen mid-stream
     });
 
     $worker->run('race-group', ['race'], new WorkerOptions(

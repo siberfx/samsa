@@ -94,10 +94,10 @@ final class ConcurrencyTest extends TestCase
             Samsa::produce('race', ['writer' => 'w', 'seq' => $i], key: 'k'.($i % 40));
         }
 
-        $a = $this->child('consume', 'race-group', 20);
+        $a = $this->child('consume', 'race-group', 30);
         usleep(1_500_000);
-        $b = $this->child('consume', 'race-group', 20);
-        $c = $this->child('consume', 'race-group', 20);
+        $b = $this->child('consume', 'race-group', 30);
+        $c = $this->child('consume', 'race-group', 30);
         usleep(2_500_000);
 
         $a->stop(0); // hard kill: no graceful release, its leases must expire
