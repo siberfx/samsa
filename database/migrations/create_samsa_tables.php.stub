@@ -1,0 +1,113 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function getConnection(): ?string
+    {
+        return config('samsa.drivers.database.connection');
+    }
+
+    public function up(): void
+    {
+        $prefix = (string) config('samsa.drivers.database.table_prefix', '');
+        $schema = Schema::connection($this->getConnection());
+
+        $schema->create($prefix.'samsa_topics', function (Blueprint $t) {
+            $t->string('name')->primary();
+            $t->unsignedSmallInteger('partitions');
+            $t->json('retention')->nullable();
+            $t->timestamps();
+        });
+
+        // One row per partition: the offset counter, locked while producing.
+        $schema->create($prefix.'samsa_partitions', function (Blueprint $t) {
+            $t->string('topic');
+            $t->unsignedSmallInteger('partition');
+            $t->unsignedBigInteger('next_offset')->default(0);
+            $t->primary(['topic', 'partition']);
+        });
+
+        $schema->create($prefix.'samsa_log', function (Blueprint $t) {
+            $t->id();
+            $t->string('topic');
+            $t->unsignedSmallInteger('partition');
+            $t->unsignedBigInteger('offset');
+            $t->string('key')->nullable();
+            $t->string('dedup_key')->nullable();
+            $t->string('event_type')->nullable();
+            $t->json('payload');
+            $t->json('headers')->nullable();
+            $t->dateTime('created_at', 6);
+
+            $t->unique(['topic', 'partition', 'offset']);
+            $t->unique(['topic', 'dedup_key']);
+            $t->index(['topic', 'partition', 'created_at']);
+        });
+
+        $schema->create($prefix.'samsa_offsets', function (Blueprint $t) {
+            $t->string('group_name');
+            $t->string('topic');
+            $t->unsignedSmallInteger('partition');
+            $t->unsignedBigInteger('committed_offset')->nullable();
+            $t->dateTime('updated_at', 6)->nullable();
+            $t->primary(['group_name', 'topic', 'partition']);
+        });
+
+        $schema->create($prefix.'samsa_leases', function (Blueprint $t) {
+            $t->string('group_name');
+            $t->string('topic');
+            $t->unsignedSmallInteger('partition');
+            $t->string('member_id')->nullable();
+            $t->dateTime('locked_until', 6)->nullable();
+            $t->primary(['group_name', 'topic', 'partition']);
+        });
+
+        $schema->create($prefix.'samsa_members', function (Blueprint $t) {
+            $t->string('group_name');
+            $t->string('topic');
+            $t->string('member_id');
+            $t->dateTime('expires_at', 6);
+            $t->primary(['group_name', 'topic', 'member_id']);
+        });
+
+        $schema->create($prefix.'samsa_failed', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->string('group_name');
+            $t->string('topic');
+            $t->unsignedSmallInteger('partition');
+            $t->unsignedBigInteger('offset');
+            $t->string('key')->nullable();
+            $t->string('event_type')->nullable();
+            $t->json('payload');
+            $t->json('headers')->nullable();
+            $t->dateTime('record_created_at', 6);
+            $t->unsignedSmallInteger('attempts');
+            $t->longText('exception');
+            $t->dateTime('failed_at', 6);
+            $t->index(['group_name', 'topic']);
+            $t->index('failed_at');
+        });
+
+        $schema->create($prefix.'samsa_processed', function (Blueprint $t) {
+            $t->string('scope');
+            $t->string('message_id');
+            $t->dateTime('processed_at', 6);
+            $t->primary(['scope', 'message_id']);
+            $t->index('processed_at');
+        });
+    }
+
+    public function down(): void
+    {
+        $prefix = (string) config('samsa.drivers.database.table_prefix', '');
+        $schema = Schema::connection($this->getConnection());
+
+        foreach (['processed', 'failed', 'members', 'leases', 'offsets', 'log', 'partitions', 'topics'] as $table) {
+            $schema->dropIfExists($prefix.'samsa_'.$table);
+        }
+    }
+};

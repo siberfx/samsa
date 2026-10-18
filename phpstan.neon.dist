@@ -1,0 +1,11 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - src
+        # analysed so the StorageDriverContract trait is checked in context
+        - tests/Contract
+    tmpDir: build/phpstan
+    treatPhpDocTypesAsCertain: false

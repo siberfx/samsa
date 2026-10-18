@@ -1,0 +1,31 @@
+# Services for the integration test suite:
+#
+#   docker compose up -d
+#   SAMSA_TEST_DB_CONNECTION=mysql DB_DATABASE=samsa_test DB_USERNAME=root vendor/bin/phpunit
+#   SAMSA_TEST_DB_CONNECTION=pgsql DB_PORT=5433 DB_DATABASE=samsa_test DB_USERNAME=postgres DB_PASSWORD=postgres vendor/bin/phpunit
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: samsa_test
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports: ["3306:3306"]
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: samsa_test
+      POSTGRES_PASSWORD: postgres
+    ports: ["5433:5432"]
+
+  # Used from v0.4 (NATS JetStream driver) and v0.5 (Redis Streams driver).
+  nats:
+    image: nats:2.10-alpine
+    command: ["--jetstream", "--store_dir=/data", "-m", "8222"]
+    ports: ["4222:4222", "8222:8222"]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports: ["6379:6379"]

@@ -1,0 +1,13 @@
+docs/*
+.cursor/*
+.superpowers/*
+.vscode/*
+.idea/*
+vendor/*
+
+# Tooling
+composer.lock
+.phpunit.cache/
+.phpunit.result.cache
+build/
+.env
