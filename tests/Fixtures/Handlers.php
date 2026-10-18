@@ -19,11 +19,15 @@ final class Journal
 
     public static int $attempts = 0;
 
+    /** @var list<mixed> */
+    public static array $jobs = [];
+
     public static function reset(): void
     {
         self::$records = [];
         self::$batches = [];
         self::$attempts = 0;
+        self::$jobs = [];
     }
 
     /**

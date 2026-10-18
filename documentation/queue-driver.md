@@ -1,6 +1,5 @@
 # Queue Driver
 
-> **Planned for v1.1.** This page documents the design of a feature that is not in 1.0.0 yet. Follow the [changelog](../CHANGELOG.md) for its release.
 
 Samsa ships a Laravel queue driver, so existing jobs run on the event log without code changes:
 
@@ -47,7 +46,9 @@ Add a connection to `config/queue.php`:
         'driver'       => 'samsa',
         'topic'        => 'laravel-jobs',  // default topic for jobs on this connection
         'group'        => 'laravel-queue', // the consumer group queue:work joins
-        'after_commit' => false,
+        'after_commit'  => false,
+        'lease_seconds' => 90,              // a job must finish within its lease (see Workers)
+        'samsa_driver'  => null,            // null = samsa.default
     ],
 ],
 ```
@@ -111,13 +112,13 @@ Each queue name is a topic, and the worker claims partitions of each listed topi
 SendReminder::dispatch($user)->delay(now()->addHours(2));
 ```
 
-A log can't hold a record back, so delayed jobs wait in a **delayed store** (`config('samsa.delayed.store')`, the `samsa_delayed` table or a Redis sorted set). They are produced to their topic when due by:
+A log can't hold a record back, so delayed jobs wait in the driver's **delayed store** (the `samsa_delayed` table for the Database driver). They are produced to their topic when due by:
 
 ```bash
 php artisan samsa:release-delayed
 ```
 
-Samsa registers this in the scheduler to run **every second**, so make sure the scheduler is running (`php artisan schedule:work` locally, cron in production).
+Samsa registers this in the scheduler to run **every second** when a queue connection uses the `samsa` driver (see [`schedule.release_delayed`](configuration.md#schedule)), so make sure the scheduler is running (`php artisan schedule:work` locally, cron in production).
 
 Delayed jobs are **ordered by due time, not dispatch time**. A delayed job for key K runs after any non-delayed jobs for K that were dispatched while it waited.
 

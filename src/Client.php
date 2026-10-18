@@ -2,10 +2,14 @@
 
 namespace Siberfx\Samsa;
 
+use Carbon\CarbonImmutable;
+use DateTimeInterface;
 use Illuminate\Database\DatabaseManager;
+use LogicException;
 use Siberfx\Samsa\Consumer\OffsetManager;
 use Siberfx\Samsa\Consumer\Stats;
 use Siberfx\Samsa\Contracts\DeadLetterStore;
+use Siberfx\Samsa\Contracts\DelayedStore;
 use Siberfx\Samsa\Contracts\StorageDriver;
 use Siberfx\Samsa\Data\OutgoingRecord;
 use Siberfx\Samsa\Data\RecordMetadata;
@@ -29,7 +33,36 @@ class Client
         private readonly Producer $producer,
         private readonly TopicRegistry $topics,
         private readonly ?DatabaseManager $db = null,
+        private readonly ?DelayedStore $delayed = null,
     ) {}
+
+    /**
+     * Produce a record once a delay has passed. It waits in the delayed store
+     * until `samsa:release-delayed` moves it into the topic.
+     *
+     * @param  DateTimeInterface|int  $availableAt  a moment, or a delay in seconds
+     */
+    public function produceLater(string $topic, OutgoingRecord $record, DateTimeInterface|int $availableAt): string
+    {
+        $this->topics->resolve($topic); // fail early on unknown topics
+
+        $at = is_int($availableAt) ? CarbonImmutable::now('UTC')->addSeconds($availableAt) : $availableAt;
+
+        return $this->delayed()->schedule($topic, $record, $at);
+    }
+
+    /**
+     * Move due delayed records into their topics. Returns how many were released.
+     */
+    public function releaseDelayed(int $limit = 500): int
+    {
+        return $this->delayed()->release(fn (string $topic, OutgoingRecord $record) => $this->producer->produce($topic, $record), $limit);
+    }
+
+    public function delayed(): DelayedStore
+    {
+        return $this->delayed ?? throw new LogicException("The [{$this->name}] driver has no delayed store.");
+    }
 
     public function name(): string
     {
@@ -77,7 +110,7 @@ class Client
 
     public function topic(string $topic): PendingRecord
     {
-        return new PendingRecord($this, $topic);
+        return new PendingRecord($this->produce(...), $topic);
     }
 
     /**
@@ -85,7 +118,7 @@ class Client
      */
     public function afterCommit(): AfterCommit
     {
-        return new AfterCommit($this, $this->db);
+        return new AfterCommit($this->produce(...), $this->db);
     }
 
     public function createTopic(string $name, ?int $partitions = null, ?RetentionPolicy $retention = null): TopicConfig

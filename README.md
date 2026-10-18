@@ -21,7 +21,7 @@
   <a href="LICENSE.md"><img src="https://img.shields.io/packagist/l/siberfx/samsa" alt="License"></a>
 </p>
 
-> **1.0.0 ships the Database and memory drivers, producers, consumer groups, workers, retries, dead letters and the operations commands.** They are tested on SQLite, MySQL/MariaDB and PostgreSQL, including multi-process tests. The queue driver, event bridge, NATS and Redis drivers are **planned** for 1.x releases. Their documentation pages are marked as such.
+> **Shipped:** the Database and memory drivers, producers, consumer groups, workers, retries, dead letters, the operations commands (1.0), and the Laravel queue driver, event bridge, `Samsa::fake()` and the `siberfx/message-bus` transport (1.1). Everything is tested on SQLite, MySQL/MariaDB and PostgreSQL, including multi-process tests. The NATS (1.2) and Redis (1.3) drivers are **planned**, and their documentation pages are marked as such.
 
 > *Gregor Samsa woke up one morning transformed. This is Kafka, transformed into a Laravel package.*
 
@@ -67,10 +67,10 @@ php artisan samsa:consume emails  orders     # an independent group reading the 
 | Multiple workers with automatic partition rebalancing and crash takeover | ✅ 1.0 |
 | Retry with backoff, dead letter queue, `samsa:failed:retry` | ✅ 1.0 |
 | Lag reporting (`samsa:status`), retention (`samsa:prune`), producer dedup, `OnlyOnce` | ✅ 1.0 |
-| `Samsa::fake()` and test assertions | Planned — 1.1 |
-| **Laravel queue driver** — `QUEUE_CONNECTION=samsa`, no job changes | Planned — 1.1 |
-| Event bridge — `#[PublishTo('orders', key: 'order_id')]` on any event | Planned — 1.1 |
-| `siberfx/message-bus` transport (`'driver' => 'samsa'`) | Planned — 1.1 |
+| `Samsa::fake()` and test assertions | ✅ 1.1 |
+| **Laravel queue driver** — `QUEUE_CONNECTION=samsa`, no job changes | ✅ 1.1 |
+| Event bridge — `#[PublishTo('orders', key: 'order_id')]` on any event | ✅ 1.1 |
+| `siberfx/message-bus` transport (`'driver' => 'samsa'`) | ✅ 1.1 |
 | **NATS JetStream driver** — closest to Kafka semantics, high throughput | Planned — 1.2 |
 | Redis Streams driver | Planned — 1.3 |
 
@@ -117,6 +117,13 @@ DB::transaction(function () use ($order) {
 
 // Subscribe a handler (or use config/samsa.php)
 Samsa::subscribe('billing', 'orders', ChargeOrder::class);
+
+// Forward domain events automatically
+#[PublishTo('orders', key: 'orderId')]
+final class OrderPlaced
+{
+    public function __construct(public string $orderId, public float $total) {}
+}
 
 // Retry a flaky handler 5 times before it is dead-lettered
 #[Retry(maxAttempts: 5, backoffMs: [200, 1000, 5000])]

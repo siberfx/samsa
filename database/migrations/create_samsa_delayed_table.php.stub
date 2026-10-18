@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Added in Samsa 1.1: records waiting for Queue::later(), $job->release($delay)
+ * and message-bus DelayStamps, moved into their topic by samsa:release-delayed.
+ */
+return new class extends Migration
+{
+    public function getConnection(): ?string
+    {
+        return config('samsa.drivers.database.connection');
+    }
+
+    public function up(): void
+    {
+        $prefix = (string) config('samsa.drivers.database.table_prefix', '');
+
+        Schema::connection($this->getConnection())->create($prefix.'samsa_delayed', function (Blueprint $t) {
+            $t->id();
+            $t->string('topic');
+            $t->string('key')->nullable();
+            $t->string('dedup_key')->nullable();
+            $t->string('event_type')->nullable();
+            $t->json('payload');
+            $t->json('headers')->nullable();
+            $t->dateTime('available_at', 6)->index();
+        });
+    }
+
+    public function down(): void
+    {
+        $prefix = (string) config('samsa.drivers.database.table_prefix', '');
+
+        Schema::connection($this->getConnection())->dropIfExists($prefix.'samsa_delayed');
+    }
+};

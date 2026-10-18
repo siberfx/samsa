@@ -2,6 +2,7 @@
 
 namespace Siberfx\Samsa;
 
+use Closure;
 use Illuminate\Database\DatabaseManager;
 
 /**
@@ -11,8 +12,11 @@ use Illuminate\Database\DatabaseManager;
  */
 final class AfterCommit
 {
+    /**
+     * @param  Closure(string, array<string, mixed>, ?string, array<string, scalar|null>, ?string, ?string): mixed  $produce
+     */
     public function __construct(
-        private readonly Client $client,
+        private readonly Closure $produce,
         private readonly ?DatabaseManager $db,
     ) {}
 
@@ -28,7 +32,7 @@ final class AfterCommit
         ?string $dedupKey = null,
         ?string $eventType = null,
     ): void {
-        $produce = fn () => $this->client->produce($topic, $payload, $key, $headers, $dedupKey, $eventType);
+        $produce = fn () => ($this->produce)($topic, $payload, $key === null ? null : (string) $key, $headers, $dedupKey, $eventType);
 
         if ($this->db === null) {
             $produce();

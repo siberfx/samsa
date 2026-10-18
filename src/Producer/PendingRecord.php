@@ -2,7 +2,7 @@
 
 namespace Siberfx\Samsa\Producer;
 
-use Siberfx\Samsa\Client;
+use Closure;
 use Siberfx\Samsa\Data\RecordMetadata;
 
 /**
@@ -19,8 +19,11 @@ final class PendingRecord
 
     private ?string $eventType = null;
 
+    /**
+     * @param  Closure(string $topic, array<string, mixed> $payload, ?string $key, array<string, scalar|null> $headers, ?string $dedupKey, ?string $eventType): RecordMetadata  $produce
+     */
     public function __construct(
-        private readonly Client $client,
+        private readonly Closure $produce,
         private readonly string $topic,
     ) {}
 
@@ -60,6 +63,6 @@ final class PendingRecord
      */
     public function produce(array $payload): RecordMetadata
     {
-        return $this->client->produce($this->topic, $payload, $this->key, $this->headers, $this->dedupKey, $this->eventType);
+        return ($this->produce)($this->topic, $payload, $this->key, $this->headers, $this->dedupKey, $this->eventType);
     }
 }

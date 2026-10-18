@@ -33,6 +33,8 @@
         "illuminate/console": "^12.0|^13.0",
         "illuminate/contracts": "^12.0|^13.0",
         "illuminate/database": "^12.0|^13.0",
+        "illuminate/events": "^12.0|^13.0",
+        "illuminate/queue": "^12.0|^13.0",
         "illuminate/support": "^12.0|^13.0",
         "symfony/uid": "^7.2|^8.0"
     },
@@ -41,13 +43,14 @@
         "laravel/pint": "^1.18",
         "orchestra/testbench": "^10.0|^11.0",
         "phpunit/phpunit": "^11.5|^12.0",
+        "siberfx/message-bus": "^0.1",
         "symfony/process": "^7.2|^8.0"
     },
     "suggest": {
         "basis-company/nats": "Required for the NATS JetStream driver (v1.2).",
         "ext-pcntl": "Required for graceful shutdown of workers on SIGTERM/SIGINT.",
         "ext-redis": "Required for the Redis Streams driver (v1.3), or use predis/predis.",
-        "siberfx/message-bus": "Use Samsa as a message-bus transport (v1.1)."
+        "siberfx/message-bus": "Use Samsa as a message-bus transport."
     },
     "autoload": {
         "psr-4": {
@@ -59,7 +62,8 @@
             "Siberfx\\Samsa\\Tests\\": "tests/"
         },
         "files": [
-            "tests/Fixtures/Handlers.php"
+            "tests/Fixtures/Handlers.php",
+            "tests/Fixtures/Bridge.php"
         ]
     },
     "scripts": {

@@ -10,6 +10,7 @@ use Siberfx\Samsa\Consumer\WorkerOptions;
 use Siberfx\Samsa\Data\Record;
 use Siberfx\Samsa\Data\RetentionPolicy;
 use Siberfx\Samsa\Facades\Samsa;
+use Siberfx\Samsa\SamsaManager;
 use Siberfx\Samsa\Tests\Fixtures\Journal;
 use Siberfx\Samsa\Tests\Fixtures\RecordingHandler;
 use Siberfx\Samsa\Tests\TestCase;
@@ -66,7 +67,7 @@ final class CommandsTest extends TestCase
         $this->assertSame(3600, Samsa::storage()->log()->topic('views')?->retention->maxAgeSeconds);
 
         config(['samsa.topics.orders.partitions' => 8]);
-        $this->app->forgetInstance('samsa');
+        $this->app->forgetInstance(SamsaManager::class);
         Facade::clearResolvedInstance('samsa');
 
         $this->artisan('samsa:topic:create', ['--from-config' => true])->expectsOutputToContain('kept 4 partitions')->assertSuccessful();

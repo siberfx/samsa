@@ -36,10 +36,12 @@ abstract class TestCase extends Orchestra
 
     protected function defineDatabaseMigrations(): void
     {
-        $migration = require __DIR__.'/../database/migrations/create_samsa_tables.php.stub';
-        $migration->down(); // leftovers from an interrupted run on a real server
-        $migration->up();
+        foreach (['create_samsa_tables', 'create_samsa_delayed_table'] as $stub) {
+            $migration = require __DIR__."/../database/migrations/{$stub}.php.stub";
+            $migration->down(); // leftovers from an interrupted run on a real server
+            $migration->up();
 
-        $this->beforeApplicationDestroyed(fn () => $migration->down());
+            $this->beforeApplicationDestroyed(fn () => $migration->down());
+        }
     }
 }

@@ -18,6 +18,7 @@ use Siberfx\Samsa\Events\RecordFailed;
 use Siberfx\Samsa\Events\WorkerStopping;
 use Siberfx\Samsa\Exceptions\LeaseLostException;
 use Siberfx\Samsa\Facades\Samsa;
+use Siberfx\Samsa\SamsaManager;
 use Siberfx\Samsa\Tests\Fixtures\FiveAttemptsHandler;
 use Siberfx\Samsa\Tests\Fixtures\Journal;
 use Siberfx\Samsa\Tests\Fixtures\RecordingBatchHandler;
@@ -391,7 +392,7 @@ final class WorkerTest extends TestCase
 
     private function rebuildSamsa(): void
     {
-        $this->app->forgetInstance('samsa');
+        $this->app->forgetInstance(SamsaManager::class);
         Facade::clearResolvedInstance('samsa');
     }
 }

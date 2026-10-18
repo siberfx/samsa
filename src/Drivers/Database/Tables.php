@@ -23,6 +23,8 @@ final readonly class Tables
 
     public string $processed;
 
+    public string $delayed;
+
     public function __construct(string $prefix = '')
     {
         $this->topics = $prefix.'samsa_topics';
@@ -33,5 +35,6 @@ final readonly class Tables
         $this->members = $prefix.'samsa_members';
         $this->failed = $prefix.'samsa_failed';
         $this->processed = $prefix.'samsa_processed';
+        $this->delayed = $prefix.'samsa_delayed';
     }
 }

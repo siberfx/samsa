@@ -1,0 +1,6 @@
+providers:
+  - Siberfx\Samsa\SamsaServiceProvider
+
+env:
+  - DB_CONNECTION=testing
+  - SAMSA_DRIVER=memory

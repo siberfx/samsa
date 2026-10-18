@@ -14,6 +14,7 @@ use Siberfx\Samsa\Exceptions\SerializationException;
 use Siberfx\Samsa\Exceptions\TopicNotFoundException;
 use Siberfx\Samsa\Facades\Samsa;
 use Siberfx\Samsa\Producer\DefaultPartitioner;
+use Siberfx\Samsa\SamsaManager;
 use Siberfx\Samsa\Tests\TestCase;
 
 final class ProducerTest extends TestCase
@@ -134,7 +135,7 @@ final class ProducerTest extends TestCase
         }
 
         config(['samsa.auto_create_topics' => true, 'samsa.topics.payments' => ['partitions' => 3]]);
-        $this->app->forgetInstance('samsa');
+        $this->app->forgetInstance(SamsaManager::class);
         Facade::clearResolvedInstance('samsa');
 
         $meta = Samsa::produce('payments', ['n' => 1]);
@@ -197,7 +198,7 @@ final class ProducerTest extends TestCase
             'database.connections.events' => ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => ''],
             'samsa.drivers.database.connection' => 'events',
         ]);
-        $this->app->forgetInstance('samsa');
+        $this->app->forgetInstance(SamsaManager::class);
         Facade::clearResolvedInstance('samsa');
 
         $this->expectException(CrossConnectionTransactionException::class);
@@ -208,7 +209,7 @@ final class ProducerTest extends TestCase
     public function test_a_record_produced_event_is_dispatched(): void
     {
         Event::fake([RecordProduced::class]);
-        $this->app->forgetInstance('samsa');
+        $this->app->forgetInstance(SamsaManager::class);
         Facade::clearResolvedInstance('samsa');
 
         Samsa::produce('orders', ['n' => 1], key: 'a');

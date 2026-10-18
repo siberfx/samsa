@@ -8,9 +8,32 @@ All notable changes to `siberfx/samsa` are documented here. The format follows
 
 ### Planned
 
-- 1.1: Laravel queue driver, `#[PublishTo]` event bridge, `Samsa::fake()` and test assertions, `siberfx/message-bus` transport.
 - 1.2: NATS JetStream driver.
 - 1.3: Redis Streams driver.
+
+## [1.1.0] - 2026-10-19
+
+### Added
+
+- **Laravel queue driver**: `'driver' => 'samsa'` queue connections. Jobs with a `samsaKey()` run strictly in order; `release()`, `later()`, `$tries`, `$backoff`, `failed()`, `queue:clear` and the queue size methods all work. Leases are released when `queue:work` stops.
+- **Event bridge**: the repeatable `#[PublishTo(topic, key:, eventType:, driver:, afterCommit:)]` attribute, the `ToSamsaPayload` contract, `samsaHeaders()`, `Samsa::publish()`, and optional forwarding of `ShouldBroadcast` events.
+- **`Samsa::fake()`** with `assertProduced`, `assertProducedTimes`, `assertProducedCount`, `assertProducedWithKey`, `assertNotProduced`, `assertNothingProduced` and `produced()`. It fakes all topics or only selected ones, and captures queued jobs, bridged events and bus messages too.
+- Test helpers: `Samsa::consumeUntilEmpty()`, `Samsa::redeliver()`, `Samsa::assertDeadLettered()`.
+- **`siberfx/message-bus` transport** (`'driver' => 'samsa'`, Laravel 13): contiguous commits, `DelayStamp` support, `HasPartitionKey` and `PartitionKeyStamp`, message counts, and listing/finding pending messages.
+- Delayed records: the `DelayedStore` contract, `Samsa::produceLater()`, `Samsa::releaseDelayed()`, the `samsa:release-delayed` command (scheduled every second when a queue connection uses Samsa), and a new `create_samsa_delayed_table` migration.
+
+### Upgrading from 1.0
+
+Publish and run the new migration:
+
+```bash
+php artisan vendor:publish --tag=samsa-migrations
+php artisan migrate
+```
+
+### Changed
+
+- The real manager is bound as `Siberfx\Samsa\SamsaManager`; `samsa` is now an alias of it, so `Samsa::fake()` can swap the facade without affecting commands.
 
 ## [1.0.0] - 2026-10-19
 
@@ -29,5 +52,6 @@ First stable release.
 - Events: `RecordProduced`, `RecordConsumed`, `RecordFailed`, `RecordDeadLettered`, `PartitionAssigned`, `PartitionRevoked`, `WorkerStopping`.
 - Multi-process integration tests for concurrent producers and for workers that are killed while consuming.
 
-[Unreleased]: https://github.com/siberfx/samsa/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/siberfx/samsa/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/siberfx/samsa/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/siberfx/samsa/releases/tag/v1.0.0

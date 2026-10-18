@@ -11,7 +11,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Supported: "database", "memory". The "nats" (v1.2) and "redis" (v1.3)
-    | drivers are on the roadmap.
+    | drivers are planned.
     |
     */
 
@@ -94,6 +94,24 @@ return [
 
     'schedule' => [
         'prune' => env('SAMSA_SCHEDULE_PRUNE', true),
+        // null = run samsa:release-delayed every second when a queue connection uses the samsa driver
+        'release_delayed' => env('SAMSA_SCHEDULE_DELAYED'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Event bridge
+    |--------------------------------------------------------------------------
+    |
+    | Events marked with #[PublishTo] are produced when dispatched. Optionally
+    | every ShouldBroadcast event is mirrored to `broadcast_topic` as well.
+    |
+    */
+
+    'bridge' => [
+        'enabled' => true,
+        'forward_broadcast_events' => false,
+        'broadcast_topic' => 'broadcasts',
     ],
 
     'serializer' => JsonSerializer::class,

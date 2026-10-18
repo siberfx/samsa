@@ -9,7 +9,7 @@ trait UsesSamsaDriver
 {
     protected function samsa(): SamsaManager
     {
-        return $this->laravel->make('samsa');
+        return $this->laravel->make(SamsaManager::class);
     }
 
     protected function client(): Client

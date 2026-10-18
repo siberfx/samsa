@@ -43,6 +43,8 @@ jobs:
           extensions: pdo_sqlite, pcntl
           coverage: none
       - run: |
+          # siberfx/message-bus needs Laravel 13; its tests skip themselves without it.
+          if [ "${{ matrix.laravel }}" = "12.*" ]; then composer remove --dev siberfx/message-bus --no-interaction --no-update; fi
           composer require "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
       - run: vendor/bin/phpunit --testsuite Unit,Contract,Feature

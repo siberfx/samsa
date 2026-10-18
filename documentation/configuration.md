@@ -15,8 +15,7 @@ This page documents every key in `config/samsa.php`.
 - [Retry](#retry)
 - [Dead letters](#dead-letters)
 - [Schedule](#schedule)
-- [Delayed records](#delayed-records-v11)
-- [Event bridge](#event-bridge-v11)
+- [Event bridge](#event-bridge)
 - [message-bus transport](#message-bus-transport)
 - [Serializer and partitioner](#serializer-and-partitioner)
 - [Subscriptions](#subscriptions)
@@ -147,22 +146,14 @@ If disabled, a record that exhausts its retries **stops the worker** with an exc
 ```php
 'schedule' => [
     'prune' => env('SAMSA_SCHEDULE_PRUNE', true), // register samsa:prune hourly
+    'release_delayed' => env('SAMSA_SCHEDULE_DELAYED'),
 ],
 ```
 
-## Delayed records `v1.1`
+`release_delayed` registers `samsa:release-delayed` every second. `null` (the default) enables it automatically when a queue connection uses the `samsa` driver; `true` or `false` force it. Delayed records (from `Queue::later()`, `$job->release($delay)` and message-bus `DelayStamp`s) wait in the driver's delayed store (the `samsa_delayed` table for the Database driver) until it runs. See [Queue driver](queue-driver.md#delayed-jobs).
 
-These keys are added to the published config with the queue driver.
 
-```php
-'delayed' => [
-    'store' => 'database', // database | redis
-],
-```
-
-Where `Queue::later()` and `$job->release($delay)` records wait until they are due. `samsa:release-delayed` moves due records into their topic. See [Queue driver](queue-driver.md#delayed-jobs).
-
-## Event bridge `v1.1`
+## Event bridge
 
 ```php
 'bridge' => [
@@ -214,6 +205,8 @@ To run Laravel jobs on Samsa, add a connection to `config/queue.php`:
     'topic'        => 'laravel-jobs',
     'group'        => 'laravel-queue',
     'after_commit' => false,
+    'lease_seconds' => 90,          // a job must finish within its lease
+    'samsa_driver'  => null,        // null = samsa.default
 ],
 ```
 
