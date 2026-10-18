@@ -8,8 +8,14 @@ All notable changes to `siberfx/samsa` are documented here. The format follows
 
 ### Planned
 
-- 1.2: NATS JetStream driver.
 - 1.3: Redis Streams driver.
+
+## [1.2.0] - 2026-10-19
+
+### Added
+
+- **NATS JetStream driver** (`SAMSA_DRIVER=nats`, needs `basis-company/nats`). It passes the full `StorageDriverContract` and the multi-process tests. Each topic is a stream with one subject per partition, and offsets are stream sequences. Offsets, leases (compare-and-swap), members, topic metadata, dead letters and delayed records live in a compact state stream. Native retention and `Nats-Msg-Id` dedup are used, with `samsa:prune` purging by subject when `respect_slowest_consumer` is set. The queue driver, event bridge and message-bus transport all work on NATS.
+- `samsa.drivers.nats.prefix` and `duplicate_window` options (`kv_bucket` was never used and has been removed).
 
 ## [1.1.0] - 2026-10-19
 
@@ -52,6 +58,7 @@ First stable release.
 - Events: `RecordProduced`, `RecordConsumed`, `RecordFailed`, `RecordDeadLettered`, `PartitionAssigned`, `PartitionRevoked`, `WorkerStopping`.
 - Multi-process integration tests for concurrent producers and for workers that are killed while consuming.
 
-[Unreleased]: https://github.com/siberfx/samsa/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/siberfx/samsa/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/siberfx/samsa/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/siberfx/samsa/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/siberfx/samsa/releases/tag/v1.0.0

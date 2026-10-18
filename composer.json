@@ -39,6 +39,7 @@
         "symfony/uid": "^7.2|^8.0"
     },
     "require-dev": {
+        "basis-company/nats": "^1.2",
         "larastan/larastan": "^3.0",
         "laravel/pint": "^1.18",
         "orchestra/testbench": "^10.0|^11.0",
@@ -47,7 +48,7 @@
         "symfony/process": "^7.2|^8.0"
     },
     "suggest": {
-        "basis-company/nats": "Required for the NATS JetStream driver (v1.2).",
+        "basis-company/nats": "Required for the NATS JetStream driver.",
         "ext-pcntl": "Required for graceful shutdown of workers on SIGTERM/SIGINT.",
         "ext-redis": "Required for the Redis Streams driver (v1.3), or use predis/predis.",
         "siberfx/message-bus": "Use Samsa as a message-bus transport."

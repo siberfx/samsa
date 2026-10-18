@@ -5,6 +5,7 @@ namespace Siberfx\Samsa\Tests\Integration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Siberfx\Samsa\Drivers\Nats\NatsDriver;
 use Siberfx\Samsa\Facades\Samsa;
 use Siberfx\Samsa\Tests\TestCase;
 use Symfony\Component\Process\PhpExecutableFinder;
@@ -27,7 +28,23 @@ final class ConcurrencyTest extends TestCase
             $this->markTestSkipped('Set SAMSA_TEST_DB_CONNECTION=mysql|mariadb|pgsql to run the multi-process tests.');
         }
 
+        if ($this->onNats()) {
+            if (! getenv('NATS_HOST')) {
+                $this->markTestSkipped('SAMSA_TEST_DRIVER=nats needs NATS_HOST.');
+            }
+
+            $this->natsPrefix = 'samsarace'.bin2hex(random_bytes(3));
+            config([
+                'samsa.default' => 'nats',
+                'samsa.drivers.nats' => ['host' => getenv('NATS_HOST'), 'prefix' => $this->natsPrefix, 'storage' => 'memory', 'timeout' => 5.0],
+            ]);
+        }
+
         Samsa::createTopic('race', self::PARTITIONS);
+
+        if ($this->onNats()) {
+            $this->assertInstanceOf(NatsDriver::class, Samsa::storage(), 'the parent must use NATS too');
+        }
 
         Schema::dropIfExists('samsa_it_consumed');
         Schema::create('samsa_it_consumed', function (Blueprint $t) {
@@ -40,8 +57,23 @@ final class ConcurrencyTest extends TestCase
         });
     }
 
+    private ?string $natsPrefix = null;
+
+    private function onNats(): bool
+    {
+        return getenv('SAMSA_TEST_DRIVER') === 'nats';
+    }
+
     protected function tearDown(): void
     {
+        if ($this->natsPrefix !== null) {
+            $storage = Samsa::storage();
+
+            if ($storage instanceof NatsDriver) {
+                $storage->destroy();
+            }
+        }
+
         Schema::dropIfExists('samsa_it_consumed');
 
         parent::tearDown();
@@ -66,11 +98,16 @@ final class ConcurrencyTest extends TestCase
                 $perWriterCount[$record->payload['writer']] = ($perWriterCount[$record->payload['writer']] ?? 0) + 1;
             }
 
-            $this->assertSame(
-                range(0, count($records) - 1),
-                array_map(fn ($r) => (int) $r->offset, $records),
-                "partition {$p}: offsets must be contiguous from 0, with no gaps or duplicates",
-            );
+            $offsets = array_map(fn ($r) => (int) $r->offset, $records);
+
+            if ($this->onNats()) {
+                // JetStream sequences are stream-global: increasing per partition, not contiguous.
+                $sorted = array_values(array_unique($offsets));
+                sort($sorted);
+                $this->assertSame($sorted, $offsets, "partition {$p}: offsets must strictly increase");
+            } else {
+                $this->assertSame(range(0, count($records) - 1), $offsets, "partition {$p}: offsets must be contiguous from 0, with no gaps or duplicates");
+            }
 
             $lastSeq = [];
 
@@ -141,6 +178,9 @@ final class ConcurrencyTest extends TestCase
                 'DB_DATABASE' => getenv('DB_DATABASE') ?: 'samsa_test',
                 'DB_USERNAME' => getenv('DB_USERNAME') ?: 'root',
                 'DB_PASSWORD' => getenv('DB_PASSWORD') ?: '',
+                'SAMSA_TEST_DRIVER' => getenv('SAMSA_TEST_DRIVER') ?: '',
+                'NATS_HOST' => getenv('NATS_HOST') ?: '',
+                'SAMSA_NATS_PREFIX' => $this->natsPrefix ?? '',
             ],
             null,
             120,

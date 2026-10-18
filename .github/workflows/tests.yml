@@ -95,3 +95,36 @@ jobs:
           DB_DATABASE: samsa_test
           DB_USERNAME: ${{ matrix.user }}
           DB_PASSWORD: ${{ matrix.password }}
+
+  nats:
+    name: nats (contract, end-to-end, multi-process)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: samsa_test
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: --health-cmd="pg_isready" --health-interval=5s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      # Services can't take command arguments, and NATS needs --jetstream.
+      - run: docker run -d --name nats -p 4222:4222 -p 8222:8222 nats:2.10-alpine --jetstream -m 8222
+      - uses: shivammathur/setup-php@v2
+        with:
+          php: '8.4'
+          extensions: pdo_pgsql, pcntl
+          coverage: none
+      - run: composer update --prefer-dist --no-interaction --no-progress
+      - run: curl --retry 10 --retry-connrefused -s http://127.0.0.1:8222/healthz
+      - run: vendor/bin/phpunit
+        env:
+          NATS_HOST: 127.0.0.1
+          SAMSA_TEST_DRIVER: nats
+          SAMSA_TEST_DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: samsa_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres

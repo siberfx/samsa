@@ -177,10 +177,10 @@ Replay only works as far back as retention allows.
 
 | Kafka | Samsa (all drivers) | Database driver | NATS JetStream | Redis Streams |
 |---|---|---|---|---|
-| Topic | Topic | `samsa_topics` row | Stream `SAMSA_{TOPIC}` | Key prefix |
-| Partition | Partition | `samsa_log.partition` | Subject `samsa.{topic}.p{N}` | Stream `{prefix}{topic}:p{N}` |
+| Topic | Topic | `samsa_topics` row | Stream `SAMSA_{topic}` | Key prefix |
+| Partition | Partition | `samsa_log.partition` | Subject `samsa.{topic}.{N}` | Stream `{prefix}{topic}:p{N}` |
 | Offset | Offset (string) | Per-partition counter | Stream sequence | Entry ID |
-| Consumer group | Group | `samsa_offsets.group_name` | Durable consumer per partition | `XGROUP` |
-| Commit | Commit | Row upsert | Ack (`AckAll`) | `XACK` |
-| Group coordinator | Leases | `samsa_leases` | JetStream KV bucket | `SET NX PX` + Lua |
-| DLQ (by convention) | Dead letter store | `samsa_failed` | `SAMSA_{TOPIC}_DLQ` stream | `{topic}:dlq` stream |
+| Consumer group | Group | `samsa_offsets.group_name` | State entry `offsets.{group}.{topic}.{N}` | `XGROUP` |
+| Commit | Commit | Row upsert | State entry update | `XACK` |
+| Group coordinator | Leases | `samsa_leases` | Compare-and-swap state entries | `SET NX PX` + Lua |
+| DLQ (by convention) | Dead letter store | `samsa_failed` | State entries `dlq.*` | `{topic}:dlq` stream |

@@ -2,7 +2,7 @@
 
 Samsa brings Kafka's event log model into Laravel: **topics** split into ordered **partitions**, records addressed by **offset**, and **consumer groups** that each read the full log at their own pace. It runs on your database, NATS JetStream or Redis, in pure PHP.
 
-> Everything here is available unless a page or section is marked **Planned** (the NATS driver is planned for 1.2 and the Redis driver for 1.3).
+> Everything here is available unless a page or section is marked **Planned** (the Redis Streams driver is planned for 1.3).
 
 ## Learn
 

@@ -29,6 +29,8 @@ use Siberfx\Samsa\Drivers\Database\DatabaseDriver;
 use Siberfx\Samsa\Drivers\Database\Tables;
 use Siberfx\Samsa\Drivers\InMemory\InMemoryDelayedStore;
 use Siberfx\Samsa\Drivers\InMemory\InMemoryDriver;
+use Siberfx\Samsa\Drivers\Nats\NatsConnection;
+use Siberfx\Samsa\Drivers\Nats\NatsDriver;
 use Siberfx\Samsa\Producer\Producer;
 use Siberfx\Samsa\Producer\TopicRegistry;
 
@@ -152,7 +154,13 @@ class SamsaManager extends Manager
 
     protected function createNatsDriver(): Client
     {
-        throw new InvalidArgumentException('The NATS JetStream driver is planned for Samsa v1.2.');
+        if (! class_exists(\Basis\Nats\Client::class)) {
+            throw new InvalidArgumentException('The NATS JetStream driver needs basis-company/nats: composer require basis-company/nats');
+        }
+
+        $driver = new NatsDriver(new NatsConnection((array) $this->config->get('samsa.drivers.nats', [])), $this->serializer());
+
+        return $this->makeClient('nats', $driver, $driver->delayed());
     }
 
     protected function createRedisDriver(): Client

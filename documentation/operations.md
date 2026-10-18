@@ -93,7 +93,7 @@ Records are deleted according to each topic's retention policy:
 | Driver | How retention runs |
 |---|---|
 | Database | `samsa:prune` deletes in chunks of 5,000 rows per partition. **Schedule it.** |
-| NATS | Natively by JetStream (`max_age`, `max_msgs_per_subject`), so `samsa:prune` is a no-op |
+| NATS | Natively by JetStream (`max_age`, `max_msgs_per_subject`). With `respect_slowest_consumer`, `samsa:prune` purges below the slowest group instead |
 | Redis | `XTRIM` on produce (approximate `MAXLEN`) plus `samsa:prune` for age-based `MINID` trimming |
 
 With `respect_slowest_consumer: true`, nothing that any known group hasn't committed yet is deleted, which avoids data loss when a group is far behind. The trade-off is that an abandoned group stops retention for good. Delete abandoned groups with `samsa:seek {group} {topic} --to=latest` or remove their offsets.

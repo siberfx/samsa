@@ -64,7 +64,7 @@ It depends on the driver, the hardware and the handlers. As an order of magnitud
 
 Yes. Records are JSON with plain headers.
 
-- **NATS:** any NATS client can consume the `SAMSA_{TOPIC}` streams. Subjects are `samsa.{topic}.p{N}`.
+- **NATS:** any NATS client can consume the `SAMSA_{topic}` streams. Subjects are `samsa.{topic}.{N}`, with the payload as JSON and Samsa metadata in `Samsa-*` headers.
 - **Redis:** any client can `XREAD` the `{prefix}{topic}:p{N}` streams.
 - **Database:** read `samsa_log` ordered by `(partition, offset)`.
 

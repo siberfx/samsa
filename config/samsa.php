@@ -10,8 +10,8 @@ return [
     | Default driver
     |--------------------------------------------------------------------------
     |
-    | Supported: "database", "memory". The "nats" (v1.2) and "redis" (v1.3)
-    | drivers are planned.
+    | Supported: "database", "nats" (needs basis-company/nats), "memory".
+    | The "redis" driver is planned for v1.3.
     |
     */
 
@@ -31,9 +31,10 @@ return [
             'token' => env('NATS_TOKEN'),
             'timeout' => 1.0,
             'reconnect' => true,
-            'storage' => 'file',
-            'replicas' => 1,
-            'kv_bucket' => 'samsa_kv_leases',
+            'storage' => 'file',              // file | memory, for streams Samsa creates
+            'replicas' => 1,                  // 3 or 5 in a JetStream cluster
+            'prefix' => env('SAMSA_NATS_PREFIX', 'samsa'), // subject root and stream name prefix
+            'duplicate_window' => 120,        // seconds: dedup keys are honoured within this window
         ],
 
         'redis' => [

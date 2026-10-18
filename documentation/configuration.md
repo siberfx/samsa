@@ -49,7 +49,8 @@ This page documents every key in `config/samsa.php`.
         'reconnect' => true,
         'storage'   => 'file',       // file | memory — JetStream storage for new streams
         'replicas'  => 1,            // 1, 3 or 5 (needs a cluster for > 1)
-        'kv_bucket' => 'samsa_kv_leases',
+        'prefix'    => env('SAMSA_NATS_PREFIX', 'samsa'), // subject root and stream prefix
+        'duplicate_window' => 120, // seconds: dedup keys are honoured within this window
     ],
 
     'redis' => [

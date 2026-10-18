@@ -226,7 +226,7 @@ To redeliver to one group only, without re-producing, run the handler directly:
 php artisan samsa:failed:retry 9b1c... --in-place   # runs the group's handler now, in this process
 ```
 
-Dead-letter storage per driver: the `samsa_failed` table (Database), the `SAMSA_{TOPIC}_DLQ` stream (NATS) or the `{prefix}{topic}:dlq` stream (Redis). The commands work the same on all of them.
+Dead-letter storage per driver: the `samsa_failed` table (Database), state entries in the `SAMSA__STATE` stream (NATS) or the `{prefix}{topic}:dlq` stream (Redis). The commands work the same on all of them.
 
 ## Replay and seek
 

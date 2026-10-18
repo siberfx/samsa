@@ -23,6 +23,16 @@ $app['config']->set('database.default', getenv('SAMSA_TEST_DB_CONNECTION') ?: 'm
 $app['config']->set('cache.default', 'array');
 $app->register(SamsaServiceProvider::class);
 
+if (getenv('SAMSA_TEST_DRIVER') === 'nats') {
+    $app['config']->set('samsa.default', 'nats');
+    $app['config']->set('samsa.drivers.nats', [
+        'host' => (string) getenv('NATS_HOST'),
+        'prefix' => (string) getenv('SAMSA_NATS_PREFIX'),
+        'storage' => 'memory',
+        'timeout' => 5.0,
+    ]);
+}
+
 [, $mode, $name, $amount] = $argv;
 
 if ($mode === 'produce') {

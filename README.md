@@ -21,7 +21,7 @@
   <a href="LICENSE.md"><img src="https://img.shields.io/packagist/l/siberfx/samsa" alt="License"></a>
 </p>
 
-> **Shipped:** the Database and memory drivers, producers, consumer groups, workers, retries, dead letters, the operations commands (1.0), and the Laravel queue driver, event bridge, `Samsa::fake()` and the `siberfx/message-bus` transport (1.1). Everything is tested on SQLite, MySQL/MariaDB and PostgreSQL, including multi-process tests. The NATS (1.2) and Redis (1.3) drivers are **planned**, and their documentation pages are marked as such.
+> **Shipped:** the Database and memory drivers, producers, consumer groups, workers, retries, dead letters, the operations commands (1.0), the Laravel queue driver, event bridge, `Samsa::fake()` and the `siberfx/message-bus` transport (1.1), and the NATS JetStream driver (1.2). Everything is tested on SQLite, MySQL/MariaDB, PostgreSQL and NATS, including multi-process tests. The Redis Streams driver is **planned** for 1.3, and its documentation page is marked as such.
 
 > *Gregor Samsa woke up one morning transformed. This is Kafka, transformed into a Laravel package.*
 
@@ -71,14 +71,14 @@ php artisan samsa:consume emails  orders     # an independent group reading the 
 | **Laravel queue driver** — `QUEUE_CONNECTION=samsa`, no job changes | ✅ 1.1 |
 | Event bridge — `#[PublishTo('orders', key: 'order_id')]` on any event | ✅ 1.1 |
 | `siberfx/message-bus` transport (`'driver' => 'samsa'`) | ✅ 1.1 |
-| **NATS JetStream driver** — closest to Kafka semantics, high throughput | Planned — 1.2 |
+| **NATS JetStream driver** — off-database, replicated, high throughput | ✅ 1.2 |
 | Redis Streams driver | Planned — 1.3 |
 
 ## Requirements
 
 - PHP 8.2+ (8.3+ for Laravel 13)
 - Laravel 12 or 13
-- MySQL 8+ / MariaDB 10.6+, PostgreSQL 13+ or SQLite 3.35+ (NATS and Redis drivers are planned)
+- MySQL 8+ / MariaDB 10.6+, PostgreSQL 13+ or SQLite 3.35+, or a NATS 2.10+ server with JetStream (`composer require basis-company/nats`). A Redis driver is planned
 - `ext-pcntl` is recommended so workers shut down gracefully on `SIGTERM` (not available on Windows)
 
 ## Installation
