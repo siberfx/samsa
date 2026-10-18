@@ -40,7 +40,7 @@ Every command accepts `--driver=` to target a non-default driver.
 | `samsa:failed:flush [--older-than=]` | Delete dead letters in bulk |
 | **Maintenance** | |
 | `samsa:prune [--topic=] [--dry-run] [--processed-older-than=]` | Apply retention; clean the `OnlyOnce` table |
-| `samsa:release-delayed` (`v0.3`) | Move due delayed records into their topics |
+| `samsa:release-delayed` (`v1.1`) | Move due delayed records into their topics |
 
 ## Topics
 
@@ -105,7 +105,7 @@ Samsa registers these automatically. You only need the scheduler running:
 | Task | Frequency | Can be disabled with |
 |---|---|---|
 | `samsa:prune` | hourly | `SAMSA_SCHEDULE_PRUNE=false` |
-| `samsa:release-delayed` (`v0.3`, with the queue driver) | every second | `SAMSA_SCHEDULE_DELAYED=false` |
+| `samsa:release-delayed` (`v1.1`, with the queue driver) | every second | `SAMSA_SCHEDULE_DELAYED=false` |
 
 Production cron:
 

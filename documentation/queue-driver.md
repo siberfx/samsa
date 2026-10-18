@@ -1,4 +1,6 @@
-# Queue Driver `v0.3`
+# Queue Driver
+
+> **Planned for v1.1.** This page documents the design of a feature that is not in 1.0.0 yet. Follow the [changelog](../CHANGELOG.md) for its release.
 
 Samsa ships a Laravel queue driver, so existing jobs run on the event log without code changes:
 

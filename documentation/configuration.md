@@ -15,8 +15,8 @@ This page documents every key in `config/samsa.php`.
 - [Retry](#retry)
 - [Dead letters](#dead-letters)
 - [Schedule](#schedule)
-- [Delayed records](#delayed-records-v03)
-- [Event bridge](#event-bridge-v03)
+- [Delayed records](#delayed-records-v11)
+- [Event bridge](#event-bridge-v11)
 - [message-bus transport](#message-bus-transport)
 - [Serializer and partitioner](#serializer-and-partitioner)
 - [Subscriptions](#subscriptions)
@@ -150,7 +150,7 @@ If disabled, a record that exhausts its retries **stops the worker** with an exc
 ],
 ```
 
-## Delayed records `v0.3`
+## Delayed records `v1.1`
 
 These keys are added to the published config with the queue driver.
 
@@ -162,7 +162,7 @@ These keys are added to the published config with the queue driver.
 
 Where `Queue::later()` and `$job->release($delay)` records wait until they are due. `samsa:release-delayed` moves due records into their topic. See [Queue driver](queue-driver.md#delayed-jobs).
 
-## Event bridge `v0.3`
+## Event bridge `v1.1`
 
 ```php
 'bridge' => [

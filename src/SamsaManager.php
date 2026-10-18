@@ -85,12 +85,12 @@ class SamsaManager extends Manager
 
     protected function createNatsDriver(): Client
     {
-        throw new InvalidArgumentException('The NATS JetStream driver ships in Samsa v0.4.');
+        throw new InvalidArgumentException('The NATS JetStream driver is planned for Samsa v1.2.');
     }
 
     protected function createRedisDriver(): Client
     {
-        throw new InvalidArgumentException('The Redis Streams driver ships in Samsa v0.5.');
+        throw new InvalidArgumentException('The Redis Streams driver is planned for Samsa v1.3.');
     }
 
     /**

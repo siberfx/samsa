@@ -10,7 +10,7 @@ return [
     | Default driver
     |--------------------------------------------------------------------------
     |
-    | Supported: "database", "memory". The "nats" (v0.4) and "redis" (v0.5)
+    | Supported: "database", "memory". The "nats" (v1.2) and "redis" (v1.3)
     | drivers are on the roadmap.
     |
     */

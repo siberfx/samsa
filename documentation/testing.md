@@ -4,12 +4,12 @@ Samsa gives you three levels of testing support:
 
 | Tool | Use it to | Speed | Status |
 |---|---|---|---|
-| [`Samsa::fake()`](#faking-the-producer) | Assert *what* your code produces, without running consumers | Fastest | `v0.3` |
+| [`Samsa::fake()`](#faking-the-producer) | Assert *what* your code produces, without running consumers | Fastest | `v1.1` |
 | [`RecordFactory`](#testing-handlers) | Unit-test handlers | Fastest | ✅ |
 | [Memory driver](#the-memory-driver) | Run real produce → consume flows in-process | Fast | ✅ |
 | [Integration tests](#integration-tests) | Test against real MySQL, PostgreSQL, NATS or Redis | Slower | ✅ (`StorageDriverContract`) |
 
-`Samsa::fake()`, `Samsa::consumeUntilEmpty()`, `Samsa::redeliver()` and `Samsa::assertDeadLettered()` ship in `v0.3`. Until then, use the memory driver with `samsa:consume --stop-when-empty` or `Samsa::worker()->run(...)`.
+`Samsa::fake()`, `Samsa::consumeUntilEmpty()`, `Samsa::redeliver()` and `Samsa::assertDeadLettered()` ship in `v1.1`. Until then, use the memory driver with `samsa:consume --stop-when-empty` or `Samsa::worker()->run(...)`.
 
 - [Faking the producer](#faking-the-producer)
 - [Testing handlers](#testing-handlers)

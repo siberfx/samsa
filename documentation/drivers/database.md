@@ -1,4 +1,4 @@
-# Database Driver `v0.1`
+# Database Driver
 
 The default driver. It stores the log, offsets, leases and dead letters in your existing database (MySQL 8+, MariaDB 10.6+, PostgreSQL 13+ or SQLite 3.35+).
 

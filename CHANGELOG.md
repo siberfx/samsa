@@ -2,9 +2,19 @@
 
 All notable changes to `siberfx/samsa` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
-[Semantic Versioning](https://semver.org/) (until `1.0.0`, minor versions may break).
+[Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+### Planned
+
+- 1.1: Laravel queue driver, `#[PublishTo]` event bridge, `Samsa::fake()` and test assertions, `siberfx/message-bus` transport.
+- 1.2: NATS JetStream driver.
+- 1.3: Redis Streams driver.
+
+## [1.0.0] - 2026-10-19
+
+First stable release.
 
 ### Added
 
@@ -18,3 +28,6 @@ All notable changes to `siberfx/samsa` are documented here. The format follows
 - Commands: `samsa:topic:create|list|alter|delete`, `samsa:produce`, `samsa:tail`, `samsa:consume`, `samsa:restart`, `samsa:status`, `samsa:groups`, `samsa:seek`, `samsa:prune`, `samsa:failed`, `samsa:failed:show|retry|forget|flush`.
 - Events: `RecordProduced`, `RecordConsumed`, `RecordFailed`, `RecordDeadLettered`, `PartitionAssigned`, `PartitionRevoked`, `WorkerStopping`.
 - Multi-process integration tests for concurrent producers and for workers that are killed while consuming.
+
+[Unreleased]: https://github.com/siberfx/samsa/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/siberfx/samsa/releases/tag/v1.0.0

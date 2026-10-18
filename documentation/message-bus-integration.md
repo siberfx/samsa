@@ -1,4 +1,6 @@
-# siberfx/message-bus Integration `v0.3`
+# siberfx/message-bus Integration
+
+> **Planned for v1.1.** This page documents the design of a feature that is not in 1.0.0 yet. Follow the [changelog](../CHANGELOG.md) for its release.
 
 [`siberfx/message-bus`](https://github.com/siberfx/message-bus) is a Symfony Messenger-style bus for Laravel: messages, handlers, middleware, transports, retries and a failure transport. Samsa plugs into it as a **transport**. Messages routed to it are written to a Samsa topic and consumed through a consumer group, so you get per-key ordering, replay and multiple independent readers behind the bus API you already use.
 

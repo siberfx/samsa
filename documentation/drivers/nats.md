@@ -1,4 +1,6 @@
-# NATS JetStream Driver `v0.4`
+# NATS JetStream Driver
+
+> **Planned for v1.2.** This page documents the design of a feature that is not in 1.0.0 yet. Follow the [changelog](../../CHANGELOG.md) for its release.
 
 [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream) is a persistent streaming layer built into the NATS server: a single ~20 MB binary with optional clustering and replication. Of Samsa's drivers it's the closest to Kafka, and it's the one to choose for high throughput.
 

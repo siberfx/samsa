@@ -1,4 +1,6 @@
-# Redis Streams Driver `v0.5`
+# Redis Streams Driver
+
+> **Planned for v1.3.** This page documents the design of a feature that is not in 1.0.0 yet. Follow the [changelog](../../CHANGELOG.md) for its release.
 
 Uses [Redis Streams](https://redis.io/docs/latest/develop/data-types/streams/) (`XADD`, `XREADGROUP`, `XACK`) for the log and plain Redis keys for leases. It's a good fit when Redis is already a **durable** part of your infrastructure.
 

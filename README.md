@@ -14,7 +14,14 @@
 
 ---
 
-> **Status: in development.** The Database and memory drivers, producers, consumer groups, workers, retries, dead letters and the operations commands are implemented and tested on SQLite, MySQL/MariaDB and PostgreSQL (features marked ✅ below). The rest of this README and [`documentation/`](documentation/README.md) describes the API Samsa is being built toward, tagged with the release that ships it. Until `v1.0.0`, minor versions may contain breaking changes.
+<p align="center">
+  <a href="https://github.com/siberfx/samsa/actions/workflows/tests.yml"><img src="https://github.com/siberfx/samsa/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="https://packagist.org/packages/siberfx/samsa"><img src="https://img.shields.io/packagist/v/siberfx/samsa" alt="Latest version"></a>
+  <a href="https://packagist.org/packages/siberfx/samsa"><img src="https://img.shields.io/packagist/php-v/siberfx/samsa" alt="PHP version"></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/packagist/l/siberfx/samsa" alt="License"></a>
+</p>
+
+> **1.0.0 ships the Database and memory drivers, producers, consumer groups, workers, retries, dead letters and the operations commands.** They are tested on SQLite, MySQL/MariaDB and PostgreSQL, including multi-process tests. The queue driver, event bridge, NATS and Redis drivers are **planned** for 1.x releases. Their documentation pages are marked as such.
 
 > *Gregor Samsa woke up one morning transformed. This is Kafka, transformed into a Laravel package.*
 
@@ -51,27 +58,28 @@ php artisan samsa:consume emails  orders     # an independent group reading the 
 
 ## Features
 
-| Feature | Since | Status |
-|---|---|---|
-| Topics with a fixed number of partitions, ordering per key | `v0.1` | ✅ |
-| **Database driver** (MySQL/MariaDB, PostgreSQL, SQLite) — produce inside your own DB transaction | `v0.1` | ✅ |
-| In-memory driver and the `StorageDriverContract` test suite | `v0.1` | ✅ |
-| Consumer groups with per-partition offsets, replay and seek | `v0.2` | ✅ |
-| Multiple workers with automatic partition rebalancing and crash takeover | `v0.2` | ✅ |
-| Retry with backoff, dead letter queue, `samsa:failed:retry` | `v0.2` | ✅ |
-| Lag reporting (`samsa:status`), retention (`samsa:prune`), producer dedup, `OnlyOnce` | `v0.2` | ✅ |
-| `Samsa::fake()` and test assertions | `v0.3` | |
-| **Laravel queue driver** — `QUEUE_CONNECTION=samsa`, no job changes | `v0.3` | |
-| Event bridge — `#[PublishTo('orders', key: 'order_id')]` on any event | `v0.3` | |
-| `siberfx/message-bus` transport (`'driver' => 'samsa'`) | `v0.3` | |
-| **NATS JetStream driver** — closest to Kafka semantics, high throughput | `v0.4` | |
-| Redis Streams driver | `v0.5` | |
+| Feature | Status |
+|---|---|
+| Topics with a fixed number of partitions, ordering per key | ✅ 1.0 |
+| **Database driver** (MySQL/MariaDB, PostgreSQL, SQLite) — produce inside your own DB transaction | ✅ 1.0 |
+| In-memory driver and the `StorageDriverContract` test suite for custom drivers | ✅ 1.0 |
+| Consumer groups with per-partition offsets, replay and seek | ✅ 1.0 |
+| Multiple workers with automatic partition rebalancing and crash takeover | ✅ 1.0 |
+| Retry with backoff, dead letter queue, `samsa:failed:retry` | ✅ 1.0 |
+| Lag reporting (`samsa:status`), retention (`samsa:prune`), producer dedup, `OnlyOnce` | ✅ 1.0 |
+| `Samsa::fake()` and test assertions | Planned — 1.1 |
+| **Laravel queue driver** — `QUEUE_CONNECTION=samsa`, no job changes | Planned — 1.1 |
+| Event bridge — `#[PublishTo('orders', key: 'order_id')]` on any event | Planned — 1.1 |
+| `siberfx/message-bus` transport (`'driver' => 'samsa'`) | Planned — 1.1 |
+| **NATS JetStream driver** — closest to Kafka semantics, high throughput | Planned — 1.2 |
+| Redis Streams driver | Planned — 1.3 |
 
 ## Requirements
 
 - PHP 8.2+ (8.3+ for Laravel 13)
 - Laravel 12 or 13
-- One of: MySQL 8+, PostgreSQL 13+, SQLite 3.35+ — or a NATS 2.10+ server — or Redis 7+
+- MySQL 8+ / MariaDB 10.6+, PostgreSQL 13+ or SQLite 3.35+ (NATS and Redis drivers are planned)
+- `ext-pcntl` is recommended so workers shut down gracefully on `SIGTERM` (not available on Windows)
 
 ## Installation
 
@@ -110,11 +118,11 @@ DB::transaction(function () use ($order) {
 // Subscribe a handler (or use config/samsa.php)
 Samsa::subscribe('billing', 'orders', ChargeOrder::class);
 
-// Forward domain events automatically
-#[PublishTo('orders', key: 'orderId')]
-final class OrderPlaced
+// Retry a flaky handler 5 times before it is dead-lettered
+#[Retry(maxAttempts: 5, backoffMs: [200, 1000, 5000])]
+final class ChargeOrder implements Handler
 {
-    public function __construct(public string $orderId, public float $total) {}
+    public function handle(Record $record): void { /* ... */ }
 }
 ```
 

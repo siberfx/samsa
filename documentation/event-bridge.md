@@ -1,4 +1,6 @@
-# Event Bridge `v0.3`
+# Event Bridge
+
+> **Planned for v1.1.** This page documents the design of a feature that is not in 1.0.0 yet. Follow the [changelog](../CHANGELOG.md) for its release.
 
 The event bridge turns ordinary Laravel events into Samsa records, so the rest of your system can consume them from the log.
 

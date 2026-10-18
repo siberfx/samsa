@@ -235,7 +235,7 @@ If ordering matters, the safe way to change the count is to create a new topic, 
 | `SerializationException` | The payload or headers can't be encoded as JSON |
 | `InvalidTopicException` | The topic name is invalid, or the partition doesn't exist |
 | `CrossConnectionTransactionException` | A transaction is open on another connection than Samsa's (see [Database driver](drivers/database.md#transactional-produce)) |
-| Backend exceptions | The Database driver lets Laravel's `QueryException` through unchanged (connection lost, deadlock, …). Network drivers (`v0.4+`) wrap failures in `DriverException` |
+| Backend exceptions | The Database driver lets Laravel's `QueryException` through unchanged (connection lost, deadlock, …). Network drivers (`v1.2+`) wrap failures in `DriverException` |
 
 Producing is **not** retried automatically. Wrap it in Laravel's `retry()` if you want that:
 
